@@ -1,0 +1,248 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design System oficial — Brasilab Intranet Lab
+ *
+ * Todas as cores são tokens semânticos em oklch.
+ * Paleta de marca aprovada:
+ *   #2b4b96  azul índigo profundo (brand-deep)
+ *   #1d5ca6  azul institucional   (primary)
+ *   #037ec7  azul ciano-tecnológico (accent / brand)
+ *
+ * Cores semânticas (success / warning / destructive / info) são funcionais
+ * e nunca devem ser usadas como cor de marca.
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  --background: oklch(0.985 0.003 258);
+  --foreground: oklch(0.267 0.069 258.9);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.267 0.069 258.9);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.267 0.069 258.9);
+
+  /* Marca */
+  --primary: oklch(0.476 0.135 255.2); /* #1d5ca6 */
+  --primary-foreground: oklch(0.99 0.005 250);
+  --brand: oklch(0.574 0.144 245.2); /* #037ec7 */
+  --brand-deep: oklch(0.431 0.129 264.3); /* #2b4b96 */
+  --brand-foreground: oklch(0.99 0.005 250);
+
+  --secondary: oklch(0.946 0.016 253.9);
+  --secondary-foreground: oklch(0.431 0.129 264.3);
+  --muted: oklch(0.968 0.008 254);
+  --muted-foreground: oklch(0.548 0.032 257);
+  --accent: oklch(0.946 0.016 253.9);
+  --accent-foreground: oklch(0.476 0.135 255.2);
+
+  --destructive: oklch(0.577 0.215 27.3);
+  --destructive-foreground: oklch(0.99 0.005 250);
+  --success: oklch(0.627 0.17 149.2);
+  --success-foreground: oklch(0.99 0.005 250);
+  --warning: oklch(0.666 0.157 58.3);
+  --warning-foreground: oklch(0.99 0.005 250);
+  --info: oklch(0.574 0.144 245.2);
+  --info-foreground: oklch(0.99 0.005 250);
+
+  --border: oklch(0.917 0.012 254);
+  --input: oklch(0.917 0.012 254);
+  --ring: oklch(0.574 0.144 245.2);
+
+  --chart-1: oklch(0.476 0.135 255.2);
+  --chart-2: oklch(0.574 0.144 245.2);
+  --chart-3: oklch(0.431 0.129 264.3);
+  --chart-4: oklch(0.627 0.17 149.2);
+  --chart-5: oklch(0.666 0.157 58.3);
+
+  --sidebar: oklch(0.296 0.076 259.3);
+  --sidebar-foreground: oklch(0.93 0.016 253);
+  --sidebar-primary: oklch(0.574 0.144 245.2);
+  --sidebar-primary-foreground: oklch(0.99 0.005 250);
+  --sidebar-accent: oklch(0.36 0.082 259);
+  --sidebar-accent-foreground: oklch(0.985 0.005 250);
+  --sidebar-border: oklch(0.36 0.082 259);
+  --sidebar-ring: oklch(0.574 0.144 245.2);
+
+  --gradient-brand: linear-gradient(135deg, var(--brand-deep), var(--brand));
+  --shadow-card: 0 1px 2px oklch(0.267 0.069 258.9 / 6%), 0 8px 24px oklch(0.267 0.069 258.9 / 6%);
+  --shadow-elevated: 0 12px 40px oklch(0.267 0.069 258.9 / 12%);
+}
+
+.dark {
+  --background: oklch(0.213 0.045 259);
+  --foreground: oklch(0.96 0.008 254);
+  --card: oklch(0.253 0.05 259);
+  --card-foreground: oklch(0.96 0.008 254);
+  --popover: oklch(0.253 0.05 259);
+  --popover-foreground: oklch(0.96 0.008 254);
+
+  --primary: oklch(0.62 0.14 248);
+  --primary-foreground: oklch(0.16 0.03 259);
+  --brand: oklch(0.66 0.135 243);
+  --brand-deep: oklch(0.5 0.13 262);
+  --brand-foreground: oklch(0.16 0.03 259);
+
+  --secondary: oklch(0.31 0.055 259);
+  --secondary-foreground: oklch(0.96 0.008 254);
+  --muted: oklch(0.31 0.055 259);
+  --muted-foreground: oklch(0.72 0.028 256);
+  --accent: oklch(0.33 0.06 259);
+  --accent-foreground: oklch(0.96 0.008 254);
+
+  --destructive: oklch(0.65 0.2 27.3);
+  --destructive-foreground: oklch(0.99 0.005 250);
+  --success: oklch(0.68 0.155 149.2);
+  --success-foreground: oklch(0.16 0.03 259);
+  --warning: oklch(0.74 0.145 65);
+  --warning-foreground: oklch(0.16 0.03 259);
+  --info: oklch(0.66 0.135 243);
+  --info-foreground: oklch(0.16 0.03 259);
+
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.66 0.135 243);
+
+  --chart-1: oklch(0.62 0.14 248);
+  --chart-2: oklch(0.66 0.135 243);
+  --chart-3: oklch(0.5 0.13 262);
+  --chart-4: oklch(0.68 0.155 149.2);
+  --chart-5: oklch(0.74 0.145 65);
+
+  --sidebar: oklch(0.19 0.042 259);
+  --sidebar-foreground: oklch(0.93 0.016 253);
+  --sidebar-primary: oklch(0.66 0.135 243);
+  --sidebar-primary-foreground: oklch(0.16 0.03 259);
+  --sidebar-accent: oklch(0.27 0.055 259);
+  --sidebar-accent-foreground: oklch(0.97 0.008 254);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.66 0.135 243);
+
+  --gradient-brand: linear-gradient(135deg, var(--brand-deep), var(--brand));
+  --shadow-card: 0 1px 2px oklch(0 0 0 / 30%), 0 8px 24px oklch(0 0 0 / 25%);
+  --shadow-elevated: 0 12px 40px oklch(0 0 0 / 40%);
+}
+
+@utility bg-gradient-brand {
+  background-image: var(--gradient-brand);
+}
+
+@utility shadow-card {
+  box-shadow: var(--shadow-card);
+}
+
+@utility shadow-elevated {
+  box-shadow: var(--shadow-elevated);
+}
+
+/*
+ * Scrollbar personalizada do Design System.
+ * Fina, discreta, cantos arredondados e cores semânticas.
+ * Compatível com Chromium (::-webkit-scrollbar) e Firefox (scrollbar-*).
+ */
+@utility scrollbar-brand {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, currentColor 28%, transparent) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: color-mix(in oklab, currentColor 8%, transparent);
+    border-radius: 9999px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, currentColor 26%, transparent);
+    border-radius: 9999px;
+    transition: background 150ms ease;
+  }
+
+  &:hover::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, currentColor 42%, transparent);
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, currentColor 58%, transparent);
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings:
+      "cv02",
+      "cv03",
+      "cv04",
+      "cv11";
+  }
+}
