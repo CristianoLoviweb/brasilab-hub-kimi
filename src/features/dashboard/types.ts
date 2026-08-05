@@ -32,7 +32,7 @@ export interface DashboardWidget {
   /** Largura no grid de 3 colunas. */
   span: 1 | 2 | 3;
   visible: boolean;
-  /** Chave no catálogo de dados simulados. */
+  /** Chave no catálogo de dados dos Widgets (widgetData.ts). */
   dataKey: string;
 }
 

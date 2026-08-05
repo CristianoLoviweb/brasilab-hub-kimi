@@ -1,0 +1,53 @@
+# Brasilab Hub — stack local/homologação (Sprint 03.2)
+#
+# Sobe a aplicação + PostgreSQL com volumes persistentes:
+#   docker compose up -d            → sobe tudo
+#   docker compose up -d db         → sobe só o banco (para npm run dev)
+#   docker compose down             → para os serviços (dados preservados)
+#   docker compose logs -f app      → acompanha os logs da aplicação
+#
+# Copie .env.example para .env e ajuste as senhas antes de subir.
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: brasilab-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-brasilab}
+    volumes:
+      # Volume persistente do banco — sobrevive a rebuilds e recriações.
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-brasilab}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  app:
+    build: .
+    container_name: brasilab-app
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-brasilab}
+      STORAGE_DIR: /app/storage
+      SESSION_TTL_HOURS: ${SESSION_TTL_HOURS:-8}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      PORT: 3000
+    volumes:
+      # Diretório persistente de arquivos (condicional nº 5): sobrevive a
+      # novo build, atualização de código, reinício e recriação do container.
+      - app_storage:/app/storage
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
+  app_storage:

@@ -2,10 +2,10 @@ import { Megaphone } from "lucide-react";
 
 import { SectionCard } from "@/components/common/SectionCard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import type { NoticeMock } from "@/features/dashboard/data/mockDashboard";
+import type { NoticeItem } from "@/features/dashboard/data/widgetData";
 
 interface NoticesCardProps {
-  items: NoticeMock[];
+  items: NoticeItem[];
   title?: string;
   description?: string;
 }

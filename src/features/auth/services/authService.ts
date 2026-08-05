@@ -1,19 +1,35 @@
+import {
+  getCurrentSessionFn,
+  requestPasswordRecoveryFn,
+  signInFn,
+  signOutFn,
+} from "@/server/fns/authFns";
+
+import type { AccessGroupCode } from "@/features/access/types";
+
 import type { LoginFormValues } from "../schemas/authSchemas";
 
 /**
- * Sessão temporária da Sprint 01.
+ * Autenticação da plataforma (Sprint 03.2).
  *
- * Decisão arquitetural: a Sprint 01 não integra Supabase Auth (previsto na
- * Stack Tecnológica) porque nenhum backend deve ser criado nesta etapa.
- * Todo o acesso ao estado de sessão passa por este service, de modo que a
- * troca pela integração real ocorrerá em um único ponto do código.
+ * Autenticação REAL no servidor: login validado com hash argon2id no
+ * PostgreSQL, sessão em cookie HttpOnly com expiração e logout com
+ * revogação. Este módulo mantém exatamente o mesmo contrato público da
+ * etapa simulada — todo o acesso ao estado de sessão passa por aqui.
+ *
+ * A chave legada da autenticação simulada ("brasilab.session", em
+ * localStorage) é removida INDIVIDUALMENTE, pelo nome, na inicialização —
+ * nenhum outro dado do navegador é tocado (condicional nº 4).
  */
+
 export interface AuthUser {
   id: string;
   name: string;
   email: string;
   role: string;
   initials: string;
+  groupCode: AccessGroupCode;
+  profileId: string;
 }
 
 export interface AuthSession {
@@ -22,67 +38,39 @@ export interface AuthSession {
   expiresAt: number;
 }
 
-const STORAGE_KEY = "brasilab.session";
-const SESSION_DURATION_MS = 1000 * 60 * 60 * 8; // 8 horas
+/** Chaves nomeadas da autenticação simulada (Sprints anteriores à 03.2). */
+const LEGACY_SESSION_KEYS = ["brasilab.session"] as const;
 
-function buildUser(email: string): AuthUser {
-  const handle = email.split("@")[0] ?? "usuario";
-  const name = handle
-    .split(/[._-]/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-
-  return {
-    id: "temp-user",
-    name: name || "Usuário Brasilab",
-    email,
-    role: "Administrador",
-    initials: (name || "Usuário Brasilab")
-      .split(" ")
-      .slice(0, 2)
-      .map((part) => part.charAt(0).toUpperCase())
-      .join(""),
-  };
-}
-
-export function readSession(): AuthSession | null {
-  if (typeof window === "undefined") return null;
-
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const session = JSON.parse(raw) as AuthSession;
-    if (!session.expiresAt || session.expiresAt < Date.now()) {
-      window.localStorage.removeItem(STORAGE_KEY);
-      return null;
+/**
+ * Remove individualmente, pelo nome, as chaves da autenticação simulada.
+ * Nunca utiliza localStorage.clear() nem varreduras genéricas.
+ */
+export function clearLegacySimulatedSessionKeys(): void {
+  if (typeof window === "undefined") return;
+  for (const key of LEGACY_SESSION_KEYS) {
+    try {
+      if (window.localStorage.getItem(key) !== null) {
+        window.localStorage.removeItem(key);
+      }
+    } catch {
+      // Ambiente sem acesso ao localStorage — nada a fazer.
     }
-    return session;
-  } catch {
-    return null;
   }
 }
 
+/** Sessão vigente, resolvida no servidor a partir do cookie HttpOnly. */
+export async function readSession(): Promise<AuthSession | null> {
+  return getCurrentSessionFn();
+}
+
 export async function signIn(values: LoginFormValues): Promise<AuthSession> {
-  await new Promise((resolve) => setTimeout(resolve, 600));
-
-  const now = Date.now();
-  const session: AuthSession = {
-    user: buildUser(values.email),
-    issuedAt: now,
-    expiresAt: now + SESSION_DURATION_MS,
-  };
-
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
-  return session;
+  return signInFn({ data: values });
 }
 
 export async function signOut(): Promise<void> {
-  window.localStorage.removeItem(STORAGE_KEY);
+  await signOutFn();
 }
 
 export async function requestPasswordRecovery(email: string): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, 600));
-  // Estrutura preparada: o envio real será implementado com Supabase Auth.
-  void email;
+  await requestPasswordRecoveryFn({ data: { email } });
 }

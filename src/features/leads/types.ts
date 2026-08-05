@@ -17,41 +17,19 @@ import type { AccessGroupCode } from "@/features/access/types";
 
 /** Ciclo de vida oficial (docs/regras_de_negocio/03_STATUS.md — item 4). */
 export type LeadStatus =
-  | "novo"
-  | "em_contato"
-  | "qualificado"
-  | "convertido"
-  | "perdido"
-  | "desqualificado";
+  "novo" | "em_contato" | "qualificado" | "convertido" | "perdido" | "desqualificado";
 
 /** Situação de atendimento — controla a fila comercial. */
 export type LeadSituation =
-  | "disponivel"
-  | "aguardando_aprovacao"
-  | "atribuido"
-  | "convertido"
-  | "perdido"
-  | "descartado";
+  "disponivel" | "aguardando_aprovacao" | "atribuido" | "convertido" | "perdido" | "descartado";
 
 /** Origem da captação. Preparada para captações externas futuras. */
-export type LeadOrigin =
-  | "landing_page"
-  | "site"
-  | "whatsapp"
-  | "manual"
-  | "integracao"
-  | "outro";
+export type LeadOrigin = "landing_page" | "site" | "whatsapp" | "manual" | "integracao" | "outro";
 
 export type LeadPriority = "baixa" | "normal" | "alta" | "urgente";
 
 /** Canal utilizado no contato registrado. */
-export type LeadContactChannel =
-  | "ligacao"
-  | "whatsapp"
-  | "email"
-  | "reuniao"
-  | "visita"
-  | "outro";
+export type LeadContactChannel = "ligacao" | "whatsapp" | "email" | "reuniao" | "visita" | "outro";
 
 /** Resultado do contato — lista centralizada para futura configuração. */
 export type LeadContactResult =
@@ -206,7 +184,7 @@ export interface LeadInput {
   origin: LeadOrigin;
   priority: LeadPriority;
   /** Atribuição imediata no cadastro (somente com permissão). */
-  assignToSellerId?: string | null;
+  assignToSellerId?: string | null | undefined;
 }
 
 /** Ator comercial simulado (vendedor ou gestor) — Sprint 03. */

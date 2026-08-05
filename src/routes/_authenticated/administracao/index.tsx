@@ -5,8 +5,8 @@ import { Building2, History, IdCard, KeyRound, ShieldCheck, Users } from "lucide
 import { PageHeader } from "@/components/common/PageHeader";
 import { StatCard } from "@/components/common/StatCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MOCK_GROUPS } from "@/features/groups/data/mockGroups";
-import { MOCK_PROFILES } from "@/features/profiles/data/mockProfiles";
+import { SEED_GROUPS } from "@/features/groups/data/seedGroups";
+import { SEED_PROFILES } from "@/features/profiles/data/seedProfiles";
 import { getAuditSummary } from "@/features/audit/services/auditService";
 import { getUsersSummary } from "@/features/users/services/userService";
 
@@ -86,8 +86,8 @@ function AdministracaoPage() {
           value={String(users.data?.ativos ?? "—")}
           icon={ShieldCheck}
         />
-        <StatCard label="Grupos" value={String(MOCK_GROUPS.length)} icon={Building2} />
-        <StatCard label="Perfis" value={String(MOCK_PROFILES.length)} icon={IdCard} />
+        <StatCard label="Grupos" value={String(SEED_GROUPS.length)} icon={Building2} />
+        <StatCard label="Perfis" value={String(SEED_PROFILES.length)} icon={IdCard} />
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -1,21 +1,31 @@
+import { MASTER_PROFILE_ID, MASTER_SPECIAL_PERMISSIONS } from "@/features/users/data/masterUser";
+
 import type { Profile } from "../types";
 
 /**
- * DEVELOPMENT ONLY (dados simulados)
- * Perfis representativos de cada Grupo. Na Sprint de backend estes registros
+ * Perfis estruturais da empresa — cadastro inicial da plataforma.
+ *
+ * O Perfil Master (PRF-001) é o perfil do Administrador Master, com todas as
+ * Permissões Especiais. Os demais Perfis representam as funções previstas de
+ * cada Grupo e serão atribuídos conforme os usuários reais forem cadastrados.
+ *
+ * Sprint 03.1: nenhum dado fictício. Na Sprint de backend estes registros
  * passarão a ser persistidos e administrados pela própria plataforma.
  */
-export const MOCK_PROFILES: Profile[] = [
+const SETUP_DATE = "2026-08-05T00:00:00.000Z";
+
+export const SEED_PROFILES: Profile[] = [
   {
-    id: "PRF-001",
-    name: "Administrador da Plataforma",
-    description: "Configuração geral do sistema, usuários e permissões.",
+    id: MASTER_PROFILE_ID,
+    name: "Master",
+    description:
+      "Acesso total à plataforma, incluindo administração de usuários, grupos, perfis e permissões.",
     groupCode: "administracao",
     level: 5,
     active: true,
-    createdAt: "2024-01-08T09:20:00.000Z",
+    createdAt: SETUP_DATE,
     override: {},
-    specialPermissions: ["usuario.excluir", "usuario.resetar_senha", "permissoes.alterar"],
+    specialPermissions: MASTER_SPECIAL_PERMISSIONS,
   },
   {
     id: "PRF-002",
@@ -24,7 +34,7 @@ export const MOCK_PROFILES: Profile[] = [
     groupCode: "diretoria",
     level: 5,
     active: true,
-    createdAt: "2024-01-08T09:40:00.000Z",
+    createdAt: SETUP_DATE,
     override: {},
     specialPermissions: ["dados.custos", "dados.confidenciais", "pedido.alterar_aprovado"],
   },
@@ -35,7 +45,7 @@ export const MOCK_PROFILES: Profile[] = [
     groupCode: "comercial",
     level: 1,
     active: true,
-    createdAt: "2024-01-16T10:00:00.000Z",
+    createdAt: SETUP_DATE,
     override: {
       revoked: { comercial: { exportar: true, importar: true } },
     },
@@ -48,7 +58,7 @@ export const MOCK_PROFILES: Profile[] = [
     groupCode: "comercial",
     level: 3,
     active: true,
-    createdAt: "2024-01-16T10:15:00.000Z",
+    createdAt: SETUP_DATE,
     override: {
       granted: { comercial: { aprovar: true } },
     },
@@ -61,7 +71,7 @@ export const MOCK_PROFILES: Profile[] = [
     groupCode: "comercial",
     level: 4,
     active: true,
-    createdAt: "2024-01-16T10:30:00.000Z",
+    createdAt: SETUP_DATE,
     override: {
       granted: { comercial: { aprovar: true, cancelar: true, excluir: true } },
     },
@@ -80,7 +90,7 @@ export const MOCK_PROFILES: Profile[] = [
     groupCode: "financeiro",
     level: 2,
     active: true,
-    createdAt: "2024-01-18T14:00:00.000Z",
+    createdAt: SETUP_DATE,
     override: {
       revoked: { financeiro: { cancelar: true } },
     },
@@ -93,7 +103,7 @@ export const MOCK_PROFILES: Profile[] = [
     groupCode: "financeiro",
     level: 4,
     active: true,
-    createdAt: "2024-01-18T14:20:00.000Z",
+    createdAt: SETUP_DATE,
     override: {
       granted: { financeiro: { excluir: true } },
     },
@@ -111,7 +121,7 @@ export const MOCK_PROFILES: Profile[] = [
     groupCode: "producao",
     level: 1,
     active: true,
-    createdAt: "2024-02-05T08:00:00.000Z",
+    createdAt: SETUP_DATE,
     override: {
       revoked: { producao: { criar: true, exportar: true } },
     },
@@ -124,7 +134,7 @@ export const MOCK_PROFILES: Profile[] = [
     groupCode: "producao",
     level: 3,
     active: true,
-    createdAt: "2024-02-05T08:25:00.000Z",
+    createdAt: SETUP_DATE,
     override: {
       granted: { producao: { aprovar: true } },
     },
@@ -137,7 +147,7 @@ export const MOCK_PROFILES: Profile[] = [
     groupCode: "compras",
     level: 2,
     active: true,
-    createdAt: "2024-02-07T09:40:00.000Z",
+    createdAt: SETUP_DATE,
     override: {},
     specialPermissions: [],
   },
@@ -148,7 +158,7 @@ export const MOCK_PROFILES: Profile[] = [
     groupCode: "compras",
     level: 4,
     active: true,
-    createdAt: "2024-02-07T09:55:00.000Z",
+    createdAt: SETUP_DATE,
     override: {
       granted: { compras: { aprovar: true } },
     },
@@ -161,7 +171,7 @@ export const MOCK_PROFILES: Profile[] = [
     groupCode: "logistica",
     level: 2,
     active: true,
-    createdAt: "2024-03-12T10:10:00.000Z",
+    createdAt: SETUP_DATE,
     override: {},
     specialPermissions: [],
   },
@@ -172,7 +182,7 @@ export const MOCK_PROFILES: Profile[] = [
     groupCode: "engenharia",
     level: 2,
     active: true,
-    createdAt: "2024-03-12T10:30:00.000Z",
+    createdAt: SETUP_DATE,
     override: {
       granted: { cadastros: { arquivos: true } },
     },
@@ -185,7 +195,7 @@ export const MOCK_PROFILES: Profile[] = [
     groupCode: "engenharia",
     level: 3,
     active: false,
-    createdAt: "2024-03-12T10:45:00.000Z",
+    createdAt: SETUP_DATE,
     override: {
       granted: { producao: { editar: true } },
     },

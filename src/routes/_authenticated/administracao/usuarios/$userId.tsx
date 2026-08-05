@@ -20,7 +20,7 @@ import { listEntityHistory } from "@/features/audit/services/auditService";
 import { SPECIAL_PERMISSIONS } from "@/features/permissions/config/specialPermissions";
 import { PermissionMatrixTable } from "@/features/permissions/components/PermissionMatrixTable";
 import { resolveEffectivePermissions } from "@/features/permissions/services/permissionsService";
-import { MOCK_PROFILES } from "@/features/profiles/data/mockProfiles";
+import { SEED_PROFILES } from "@/features/profiles/data/seedProfiles";
 import { UserForm } from "@/features/users/components/UserForm";
 import {
   changeUserStatus,
@@ -128,7 +128,7 @@ function UsuarioDetalhePage() {
     );
   }
 
-  const profile = MOCK_PROFILES.find((item) => item.id === user.profileId);
+  const profile = SEED_PROFILES.find((item) => item.id === user.profileId);
   const group = getAccessGroup(user.groupCode);
   const groupLabel =
     ACCESS_GROUP_LIST.find((item) => item.code === user.groupCode)?.label ?? user.groupCode;

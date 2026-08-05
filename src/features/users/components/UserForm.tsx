@@ -25,7 +25,7 @@ import { ACCESS_GROUP_LIST } from "@/features/access/config/accessGroups";
 import type { AccessGroupCode } from "@/features/access/types";
 import { SPECIAL_PERMISSIONS } from "@/features/permissions/config/specialPermissions";
 import type { SpecialPermissionCode } from "@/features/permissions/types";
-import { MOCK_PROFILES } from "@/features/profiles/data/mockProfiles";
+import { SEED_PROFILES } from "@/features/profiles/data/seedProfiles";
 import { userFormSchema } from "../schemas/userSchemas";
 import type { UserFormValues } from "../schemas/userSchemas";
 import { USER_STATUS_LABELS } from "../types";
@@ -57,7 +57,7 @@ export function UserForm({ user, submitting, onSubmit, onCancel }: UserFormProps
   });
 
   const groupCode = form.watch("groupCode");
-  const profiles = MOCK_PROFILES.filter((profile) => profile.groupCode === groupCode);
+  const profiles = SEED_PROFILES.filter((profile) => profile.groupCode === groupCode);
   const selectedSpecial = (form.watch("specialPermissions") ?? []) as string[];
 
   const handleSubmit = form.handleSubmit((values) => {

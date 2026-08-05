@@ -1,4 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
 import { useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 
@@ -34,14 +35,16 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   LEAD_FILE_CLASSIFICATIONS,
   LEAD_PRIORITY_LABELS,
+  LEAD_SCHEDULE_STATUS_LABELS,
 } from "../../constants/leadDomain";
 import { LEAD_FIRST_CONTACT_HOURS } from "../../constants/leadTiming";
-import { MOCK_SELLERS } from "../../data/mockLeads";
+import { COMMERCIAL_SELLERS } from "../../data/commercialTeam";
 import {
   leadClosingSchema,
   leadDirectAssignmentSchema,
   leadFileSchema,
   leadNoteSchema,
+  leadScheduleEditSchema,
   leadScheduleSchema,
 } from "../../schemas/leadSchemas";
 import type {
@@ -49,9 +52,10 @@ import type {
   LeadDirectAssignmentValues,
   LeadFileFormValues,
   LeadNoteFormValues,
+  LeadScheduleEditFormValues,
   LeadScheduleFormValues,
 } from "../../schemas/leadSchemas";
-import type { LeadPriority } from "../../types";
+import type { LeadPriority, LeadSchedule, LeadScheduleStatus } from "../../types";
 
 /** Diálogos de ação do Lead — todos consomem os schemas oficiais do módulo. */
 
@@ -137,6 +141,161 @@ export function LeadScheduleDialog({
   );
 }
 
+/* ---------------------------------------------------- edição de compromisso */
+
+const SCHEDULE_STATUS_OPTIONS: LeadScheduleStatus[] = [
+  "pendente",
+  "concluido",
+  "cancelado",
+  "expirado",
+];
+
+/** Converte ISO para o formato aceito por input[type="datetime-local"]. */
+function toDateTimeLocalValue(iso: string): string {
+  return format(new Date(iso), "yyyy-MM-dd'T'HH:mm");
+}
+
+export function LeadScheduleEditDialog({
+  trigger,
+  schedule,
+  submitting,
+  onSubmit,
+}: BaseDialogProps & {
+  schedule: LeadSchedule;
+  onSubmit: (values: LeadScheduleEditFormValues) => Promise<void> | void;
+}) {
+  const [open, setOpen] = useState(false);
+  const form = useForm<LeadScheduleEditFormValues>({
+    resolver: zodResolver(leadScheduleEditSchema),
+    defaultValues: {
+      title: schedule.title,
+      scheduledFor: toDateTimeLocalValue(schedule.scheduledFor),
+      description: schedule.description,
+      ownerId: schedule.ownerId,
+      status: schedule.status,
+    },
+  });
+
+  const handleSubmit = form.handleSubmit(async (values) => {
+    await onSubmit(values);
+    setOpen(false);
+  });
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Editar compromisso</DialogTitle>
+          <DialogDescription>
+            O registro atual será atualizado — nenhum compromisso duplicado será criado. A alteração
+            é registrada no Histórico e na Auditoria.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Título</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Título do compromisso" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="scheduledFor"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Data e horário</FormLabel>
+                  <FormControl>
+                    <Input type="datetime-local" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Descrição</FormLabel>
+                  <FormControl>
+                    <Textarea rows={3} placeholder="Descreva o objetivo" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="ownerId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Responsável</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {COMMERCIAL_SELLERS.map((seller) => (
+                        <SelectItem key={seller.id} value={seller.id}>
+                          {seller.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {SCHEDULE_STATUS_OPTIONS.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {LEAD_SCHEDULE_STATUS_LABELS[status]}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={submitting}>
+                Salvar alterações
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* -------------------------------------------------------------- nota interna */
 
 export function LeadNoteDialog({
@@ -203,16 +362,18 @@ export function LeadFileDialog({
   submitting,
   onSubmit,
 }: BaseDialogProps & {
-  onSubmit: (values: { name: string; classification: string }) => Promise<void> | void;
+  onSubmit: (values: { file: File; classification: string }) => Promise<void> | void;
 }) {
   const [open, setOpen] = useState(false);
   const form = useForm<LeadFileFormValues>({
     resolver: zodResolver(leadFileSchema),
-    defaultValues: { name: "", classification: LEAD_FILE_CLASSIFICATIONS[0]! },
+    defaultValues: {
+      classification: LEAD_FILE_CLASSIFICATIONS[0]!,
+    },
   });
 
   const handleSubmit = form.handleSubmit(async (values) => {
-    await onSubmit({ name: values.name.trim(), classification: values.classification });
+    await onSubmit({ file: values.file, classification: values.classification });
     form.reset();
     setOpen(false);
   });
@@ -224,21 +385,28 @@ export function LeadFileDialog({
         <DialogHeader>
           <DialogTitle>Adicionar arquivo</DialogTitle>
           <DialogDescription>
-            Nesta etapa apenas os metadados são registrados: não existe envio real de
-            arquivos.
+            O arquivo é armazenado localmente com segurança e vinculado ao Lead: será possível
+            visualizá-lo, baixá-lo ou excluí-lo posteriormente.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={handleSubmit} className="space-y-4">
             <FormField
               control={form.control}
-              name="name"
-              render={({ field }) => (
+              name="file"
+              render={({ field: { onChange, onBlur, name, ref } }) => (
                 <FormItem>
-                  <FormLabel>Nome do arquivo</FormLabel>
+                  <FormLabel>Arquivo</FormLabel>
                   <FormControl>
-                    <Input placeholder="projeto-laboratorio.pdf" {...field} />
+                    <Input
+                      type="file"
+                      name={name}
+                      ref={ref}
+                      onBlur={onBlur}
+                      onChange={(event) => onChange(event.target.files?.[0] ?? undefined)}
+                    />
                   </FormControl>
+                  <FormDescription>Qualquer formato, até 10 MB por arquivo.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -301,7 +469,7 @@ export function LeadAssignmentDialog({
   const form = useForm<LeadDirectAssignmentValues>({
     resolver: zodResolver(leadDirectAssignmentSchema),
     defaultValues: {
-      sellerId: MOCK_SELLERS[0]!.id,
+      sellerId: COMMERCIAL_SELLERS[0]!.id,
       firstContactHours: LEAD_FIRST_CONTACT_HOURS,
       priority: "normal",
       observation: "",
@@ -309,7 +477,7 @@ export function LeadAssignmentDialog({
   });
 
   const handleSubmit = form.handleSubmit(async (values) => {
-    const seller = MOCK_SELLERS.find((item) => item.id === values.sellerId);
+    const seller = COMMERCIAL_SELLERS.find((item) => item.id === values.sellerId);
     const observation = values.observation?.trim();
 
     await onSubmit({
@@ -331,8 +499,7 @@ export function LeadAssignmentDialog({
         <DialogHeader>
           <DialogTitle>Atribuir diretamente</DialogTitle>
           <DialogDescription>
-            A atribuição direta dispensa a aprovação e cria imediatamente o primeiro
-            contato.
+            A atribuição direta dispensa a aprovação e cria imediatamente o primeiro contato.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -350,7 +517,7 @@ export function LeadAssignmentDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {MOCK_SELLERS.map((seller) => (
+                      {COMMERCIAL_SELLERS.map((seller) => (
                         <SelectItem key={seller.id} value={seller.id}>
                           {seller.name}
                         </SelectItem>
@@ -503,4 +670,3 @@ export function LeadReasonDialog({
     </Dialog>
   );
 }
-

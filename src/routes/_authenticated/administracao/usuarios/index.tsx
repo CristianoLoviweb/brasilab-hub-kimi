@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ACCESS_GROUP_LIST } from "@/features/access/config/accessGroups";
-import { MOCK_PROFILES } from "@/features/profiles/data/mockProfiles";
+import { SEED_PROFILES } from "@/features/profiles/data/seedProfiles";
 import { listUsers } from "@/features/users/services/userService";
 import { USER_STATUS_LABELS } from "@/features/users/types";
 import type { User, UserStatus } from "@/features/users/types";
@@ -53,7 +53,7 @@ const STATUS_TONE: Record<UserStatus, StatusTone> = {
 };
 
 function profileName(profileId: string): string {
-  return MOCK_PROFILES.find((profile) => profile.id === profileId)?.name ?? "—";
+  return SEED_PROFILES.find((profile) => profile.id === profileId)?.name ?? "—";
 }
 
 function groupName(code: string): string {

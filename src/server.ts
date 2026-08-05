@@ -2,6 +2,20 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { handleFilesApi } from "./server/api/filesApi";
+import { ensureSeed } from "./server/db/seed";
+
+// Seed idempotente (grupos, perfis e Administrador Master) — executado uma
+// vez por processo, na inicialização do servidor (condicional nº 6).
+let seedPromise: Promise<unknown> | undefined;
+function bootSeed(): void {
+  if (!seedPromise) {
+    seedPromise = ensureSeed().catch((error) => {
+      seedPromise = undefined;
+      console.error("[seed] Falha ao executar o seed:", error);
+    });
+  }
+}
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -46,7 +60,12 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    bootSeed();
     try {
+      // Rotas HTTP de arquivos (upload multipart e streaming) — fora do SSR.
+      if (new URL(request.url).pathname.startsWith("/api/")) {
+        return await handleFilesApi(request);
+      }
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);

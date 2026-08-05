@@ -23,7 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 
 import { LEAD_ORIGIN_LABELS, LEAD_PRIORITY_LABELS } from "../constants/leadDomain";
-import { MOCK_SELLERS } from "../data/mockLeads";
+import { COMMERCIAL_SELLERS } from "../data/commercialTeam";
 import { leadFormSchema } from "../schemas/leadSchemas";
 import type { LeadFormValues } from "../schemas/leadSchemas";
 import type { LeadInput, LeadOrigin, LeadPriority } from "../types";
@@ -326,7 +326,7 @@ export function LeadForm({
                         <SelectItem value={UNASSIGNED}>
                           Enviar para a fila de disponíveis
                         </SelectItem>
-                        {MOCK_SELLERS.map((seller) => (
+                        {COMMERCIAL_SELLERS.map((seller) => (
                           <SelectItem key={seller.id} value={seller.id}>
                             {seller.name}
                           </SelectItem>

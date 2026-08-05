@@ -1,13 +1,7 @@
-import {
-  createContext,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import {
+  clearLegacySimulatedSessionKeys,
   readSession,
   signIn,
   signOut,
@@ -32,8 +26,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    setSession(readSession());
-    setIsReady(true);
+    let active = true;
+
+    // Remove as chaves nomeadas da autenticação simulada (condicional nº 4)
+    // e resolve a sessão real no servidor.
+    clearLegacySimulatedSessionKeys();
+    readSession()
+      .then((current) => {
+        if (active) setSession(current);
+      })
+      .catch(() => {
+        if (active) setSession(null);
+      })
+      .finally(() => {
+        if (active) setIsReady(true);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   const login = useCallback(async (values: LoginFormValues) => {

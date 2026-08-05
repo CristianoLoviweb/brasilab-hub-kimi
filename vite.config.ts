@@ -19,12 +19,7 @@ export default defineConfig({
   ],
 
   resolve: {
-    dedupe: [
-      "react",
-      "react-dom",
-      "@tanstack/react-router",
-      "@tanstack/react-start",
-    ],
+    dedupe: ["react", "react-dom", "@tanstack/react-router", "@tanstack/react-start"],
   },
 
   server: {

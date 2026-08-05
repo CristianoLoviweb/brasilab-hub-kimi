@@ -1,23 +1,21 @@
 import { useMemo } from "react";
 
 import { useAccessGroup } from "@/features/access/hooks/useAccessGroup";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { MASTER_USER } from "@/features/users/data/masterUser";
 
 import {
   LEAD_PERMISSION_SETS,
   type LeadPermissionCode,
 } from "../constants/leadPermissions";
-import { MOCK_MANAGERS, MOCK_SELLERS } from "../data/mockLeads";
 import type { CommercialActor } from "../types";
 
 /**
- * DEVELOPMENT ONLY (parte simulada)
- *
  * Ator comercial corrente (vendedor, gestor ou observador).
  *
- * Nesta Sprint a identidade deriva do Grupo e do Perfil simulados
- * (DevGroupSwitcher, Sprint 01/02). Quando a Autenticação real existir, este
- * hook passará a obter o usuário autenticado e suas permissões do backend,
- * mantendo exatamente a mesma assinatura pública ({ actor, can, isManager }).
+ * Sprint 03.1: a identidade deriva do usuário autenticado. O único usuário
+ * da plataforma (Administrador Master) pertence ao Grupo Administração e
+ * possui atribuição de gestão comercial.
  *
  * A autorização exibida aqui é apenas apresentação: a validação definitiva
  * ocorrerá SEMPRE no servidor (docs/10_SEGURANCA_DA_INFORMACAO.md).
@@ -26,12 +24,9 @@ import type { CommercialActor } from "../types";
 /** Perfis comerciais com atribuição de gestão (docs — Perfis da Sprint 02). */
 const MANAGER_PROFILES = ["PRF-004", "PRF-005"];
 
-const DEFAULT_SELLER = MOCK_SELLERS[2]!; // Patrícia Moraes
-const DEFAULT_MANAGER = MOCK_MANAGERS[0]!; // Camila Nogueira
-
 export interface CommercialActorState {
   actor: CommercialActor;
-  /** Conjunto simulado de permissões do módulo. */
+  /** Conjunto de permissões do módulo. */
   permissions: readonly LeadPermissionCode[];
   can: (permission: LeadPermissionCode) => boolean;
   isManager: boolean;
@@ -42,6 +37,7 @@ export interface CommercialActorState {
 
 export function useCommercialActor(): CommercialActorState {
   const { group, profileId, isReady } = useAccessGroup();
+  const { user } = useAuth();
 
   return useMemo(() => {
     const isCommercial = group.code === "comercial";
@@ -51,11 +47,9 @@ export function useCommercialActor(): CommercialActorState {
       (isCommercial && MANAGER_PROFILES.includes(profileId ?? ""));
     const isViewer = !isCommercial && !isAdministrative;
 
-    const identity = isManager ? DEFAULT_MANAGER : DEFAULT_SELLER;
-
     const actor: CommercialActor = {
-      id: identity.id,
-      name: identity.name,
+      id: user?.id ?? MASTER_USER.id,
+      name: user?.name ?? MASTER_USER.name,
       groupCode: group.code,
       profileId: profileId ?? "",
       isManager,
@@ -75,5 +69,5 @@ export function useCommercialActor(): CommercialActorState {
       isViewer,
       isReady,
     };
-  }, [group.code, profileId, isReady]);
+  }, [group.code, profileId, isReady, user?.id, user?.name]);
 }

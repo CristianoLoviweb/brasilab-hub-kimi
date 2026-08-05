@@ -29,7 +29,8 @@ export function QuickActionsCard({
             variant="outline"
             className="h-auto justify-start gap-2 py-3"
           >
-            <Link to={`/${item.slug}`}>
+            {/* Os slugs vêm de NAVIGATION_ITEMS e correspondem a rotas reais. */}
+            <Link to={`/${item.slug}` as "/"}>
               <item.icon className="h-4 w-4 shrink-0 text-primary" />
               <span className="truncate text-sm">{item.label}</span>
             </Link>

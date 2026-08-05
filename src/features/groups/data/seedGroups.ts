@@ -4,67 +4,72 @@ import type { AccessGroupCode } from "@/features/access/types";
 import type { Group } from "../types";
 
 /**
- * DEVELOPMENT ONLY (dados simulados)
+ * Grupos estruturais da empresa — cadastro inicial da plataforma.
  *
  * Os Grupos reaproveitam a configuração de acesso já existente
  * (src/features/access/config/accessGroups.ts) — nenhuma regra é duplicada.
  * Aqui apenas complementamos os dados cadastrais do setor.
+ *
+ * Sprint 03.1: nenhum dado fictício. Os responsáveis por cada área serão
+ * definidos conforme os usuários reais forem cadastrados na plataforma.
  */
+const SETUP_DATE = "2026-08-05T00:00:00.000Z";
+
 const GROUP_METADATA: Record<
   AccessGroupCode,
   { manager: string; email: string; createdAt: string; active: boolean }
 > = {
   administracao: {
-    manager: "Marina Duarte",
+    manager: "",
     email: "administracao@brasilab.com.br",
-    createdAt: "2024-01-08T09:00:00.000Z",
+    createdAt: SETUP_DATE,
     active: true,
   },
   diretoria: {
-    manager: "Roberto Salles",
+    manager: "",
     email: "diretoria@brasilab.com.br",
-    createdAt: "2024-01-08T09:10:00.000Z",
+    createdAt: SETUP_DATE,
     active: true,
   },
   comercial: {
-    manager: "Camila Nogueira",
+    manager: "",
     email: "comercial@brasilab.com.br",
-    createdAt: "2024-01-15T13:20:00.000Z",
+    createdAt: SETUP_DATE,
     active: true,
   },
   financeiro: {
-    manager: "Eduardo Prado",
+    manager: "",
     email: "financeiro@brasilab.com.br",
-    createdAt: "2024-01-15T13:35:00.000Z",
+    createdAt: SETUP_DATE,
     active: true,
   },
   producao: {
-    manager: "Sérgio Bastos",
+    manager: "",
     email: "producao@brasilab.com.br",
-    createdAt: "2024-02-02T11:05:00.000Z",
+    createdAt: SETUP_DATE,
     active: true,
   },
   compras: {
-    manager: "Aline Torres",
+    manager: "",
     email: "compras@brasilab.com.br",
-    createdAt: "2024-02-02T11:20:00.000Z",
+    createdAt: SETUP_DATE,
     active: true,
   },
   logistica: {
-    manager: "Paulo Menezes",
+    manager: "",
     email: "logistica@brasilab.com.br",
-    createdAt: "2024-03-11T08:45:00.000Z",
+    createdAt: SETUP_DATE,
     active: true,
   },
   engenharia: {
-    manager: "Fernanda Lima",
+    manager: "",
     email: "engenharia@brasilab.com.br",
-    createdAt: "2024-03-11T09:00:00.000Z",
+    createdAt: SETUP_DATE,
     active: true,
   },
 };
 
-export const MOCK_GROUPS: Group[] = ACCESS_GROUP_LIST.map((accessGroup) => ({
+export const SEED_GROUPS: Group[] = ACCESS_GROUP_LIST.map((accessGroup) => ({
   code: accessGroup.code,
   name: accessGroup.label,
   description: accessGroup.description,

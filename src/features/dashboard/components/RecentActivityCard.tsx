@@ -3,17 +3,18 @@ import { Activity } from "lucide-react";
 import { SectionCard } from "@/components/common/SectionCard";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Badge } from "@/components/ui/badge";
-import type { ActivityMock } from "@/features/dashboard/data/mockDashboard";
+import type { ActivityItem } from "@/features/dashboard/data/widgetData";
 
 const TYPE_LABEL: Record<string, string> = {
   comercial: "Comercial",
   producao: "Produção",
   compras: "Compras",
   financeiro: "Financeiro",
+  administracao: "Administração",
 };
 
 interface RecentActivityCardProps {
-  items: ActivityMock[];
+  items: ActivityItem[];
   title?: string;
   description?: string;
 }
@@ -27,10 +28,7 @@ export function RecentActivityCard({
   return (
     <SectionCard title={title} description={description} icon={Activity}>
       {items.length === 0 ? (
-        <EmptyState
-          title="Sem atividades"
-          description="Nenhum evento registrado no período."
-        />
+        <EmptyState title="Sem atividades" description="Nenhum evento registrado no período." />
       ) : (
         <ol className="space-y-4">
           {items.map((item) => (

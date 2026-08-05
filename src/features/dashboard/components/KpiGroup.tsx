@@ -1,10 +1,10 @@
 import { TrendingUp } from "lucide-react";
 
 import { StatCard } from "@/components/common/StatCard";
-import type { KpiMock } from "@/features/dashboard/data/mockDashboard";
+import type { KpiItem } from "@/features/dashboard/data/widgetData";
 
 interface KpiGroupProps {
-  items: KpiMock[];
+  items: KpiItem[];
   title?: string;
 }
 

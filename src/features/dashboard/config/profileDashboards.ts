@@ -11,8 +11,7 @@ import type { DashboardProfileConfig } from "../types";
  * A sobrescrita nunca cria Widgets: apenas oculta, reordena ou redimensiona
  * os Widgets já autorizados ao Grupo.
  *
- * DEVELOPMENT ONLY (dados simulados) — futuramente administrado pela tela de
- * configuração do Dashboard.
+ * Futuramente administrado pela tela de configuração do Dashboard.
  */
 export const DASHBOARD_PROFILE_OVERRIDES: Record<string, DashboardProfileConfig> = {
   // Vendedor — foco na carteira, sem visão consolidada da área.

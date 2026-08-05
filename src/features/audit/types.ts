@@ -14,13 +14,7 @@ import type { AccessGroupCode } from "@/features/access/types";
 
 /** Entidades auditáveis previstas. */
 export type AuditEntity =
-  | "usuario"
-  | "grupo"
-  | "perfil"
-  | "permissao"
-  | "sessao"
-  | "dashboard"
-  | "lead";
+  "usuario" | "grupo" | "perfil" | "permissao" | "sessao" | "dashboard" | "lead";
 
 /** Ações auditáveis (nomenclatura entidade.acao). */
 export type AuditAction =
@@ -42,8 +36,11 @@ export type AuditAction =
   | "liberado"
   | "contato_registrado"
   | "agendado"
+  | "agendamento_editado"
+  | "agendamento_excluido"
   | "nota_adicionada"
   | "arquivo_adicionado"
+  | "arquivo_removido"
   | "convertido"
   | "perdido"
   | "descartado";
@@ -77,8 +74,11 @@ export const AUDIT_ACTION_LABELS: Record<AuditAction, string> = {
   liberado: "Devolvido à fila",
   contato_registrado: "Contato registrado",
   agendado: "Contato agendado",
+  agendamento_editado: "Agendamento editado",
+  agendamento_excluido: "Agendamento excluído",
   nota_adicionada: "Nota adicionada",
   arquivo_adicionado: "Arquivo adicionado",
+  arquivo_removido: "Arquivo removido",
   convertido: "Convertido",
   perdido: "Perdido",
   descartado: "Descartado",

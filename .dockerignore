@@ -1,0 +1,8 @@
+.env
+storage/
+pgdata/
+node_modules
+.output
+.git
+.tanstack
+*.log

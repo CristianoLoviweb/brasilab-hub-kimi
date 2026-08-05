@@ -16,7 +16,7 @@ import type { AccessGroupCode } from "@/features/access/types";
 import { PermissionMatrixTable } from "@/features/permissions/components/PermissionMatrixTable";
 import { SPECIAL_PERMISSIONS } from "@/features/permissions/config/specialPermissions";
 import { resolveEffectivePermissions } from "@/features/permissions/services/permissionsService";
-import { MOCK_PROFILES } from "@/features/profiles/data/mockProfiles";
+import { SEED_PROFILES } from "@/features/profiles/data/seedProfiles";
 
 export const Route = createFileRoute("/_authenticated/administracao/permissoes")({
   head: () => ({
@@ -43,7 +43,7 @@ function PermissoesPage() {
   const [profileId, setProfileId] = useState<string>("nenhum");
 
   const group = getAccessGroup(groupCode);
-  const profiles = MOCK_PROFILES.filter((profile) => profile.groupCode === groupCode);
+  const profiles = SEED_PROFILES.filter((profile) => profile.groupCode === groupCode);
   const profile = profiles.find((item) => item.id === profileId);
 
   const effective = resolveEffectivePermissions({

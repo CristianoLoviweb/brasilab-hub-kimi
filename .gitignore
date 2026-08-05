@@ -30,3 +30,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+
+# Local persistent data and backups
+storage/
+backups/
+backup-*.dump
+backup-*.tar.gz
+*.dump
+
+# Testes locais
+Testes/

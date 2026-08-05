@@ -2,10 +2,10 @@ import { Clock } from "lucide-react";
 
 import { SectionCard } from "@/components/common/SectionCard";
 import { EmptyState } from "@/components/common/EmptyState";
-import type { AgendaMock } from "@/features/dashboard/data/mockDashboard";
+import type { AgendaItem } from "@/features/dashboard/data/widgetData";
 
 interface AgendaCardProps {
-  items: AgendaMock[];
+  items: AgendaItem[];
   title?: string;
   description?: string;
 }

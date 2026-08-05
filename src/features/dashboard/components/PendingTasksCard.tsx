@@ -4,7 +4,7 @@ import { SectionCard } from "@/components/common/SectionCard";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { PendingMock } from "@/features/dashboard/data/mockDashboard";
+import type { PendingItem } from "@/features/dashboard/data/widgetData";
 
 const PRIORITY_VARIANT: Record<string, "destructive" | "secondary" | "outline"> = {
   alta: "destructive",
@@ -13,7 +13,7 @@ const PRIORITY_VARIANT: Record<string, "destructive" | "secondary" | "outline"> 
 };
 
 interface PendingTasksCardProps {
-  items: PendingMock[];
+  items: PendingItem[];
   title?: string;
   description?: string;
 }

@@ -1,3 +1,5 @@
+import { useQuery } from "@tanstack/react-query";
+
 import { EmptyState } from "@/components/common/EmptyState";
 import { AgendaCard } from "@/features/dashboard/components/AgendaCard";
 import { ChartCard } from "@/features/dashboard/components/DashboardCharts";
@@ -9,6 +11,7 @@ import { QuickActionsCard } from "@/features/dashboard/components/QuickActionsCa
 import { RecentActivityCard } from "@/features/dashboard/components/RecentActivityCard";
 import { StatusSummaryCard } from "@/features/dashboard/components/StatusSummaryCard";
 import { getWidgetData } from "@/features/dashboard/data/widgetData";
+import { resolveWidgetData } from "@/features/dashboard/services/dashboardService";
 import {
   LeadsAgendaWidget,
   LeadsKpisWidget,
@@ -18,6 +21,12 @@ import type { DashboardWidget } from "@/features/dashboard/types";
 /**
  * Registry de Widgets: liga a configuração (código + dados) ao componente
  * reutilizável responsável pela apresentação.
+ *
+ * Os dados são sempre calculados dinamicamente pelo Service oficial do
+ * Dashboard (resolveWidgetData): a cada montagem os indicadores são
+ * recalculados a partir dos Services dos módulos, então qualquer ação
+ * (criar Lead, registrar contato, agendar, anexar arquivo…) reflete-se
+ * automaticamente no Dashboard.
  */
 export function WidgetRenderer({ widget }: { widget: DashboardWidget }) {
   // Widgets de Leads consomem o Service oficial do módulo (dados vivos).
@@ -33,13 +42,26 @@ export function WidgetRenderer({ widget }: { widget: DashboardWidget }) {
     );
   }
 
-  const data = getWidgetData(widget.dataKey);
+  return <ServiceDrivenWidget widget={widget} />;
+}
+
+function ServiceDrivenWidget({ widget }: { widget: DashboardWidget }) {
+  const query = useQuery({
+    queryKey: ["dashboard", "widget", widget.dataKey],
+    queryFn: () => resolveWidgetData(widget.dataKey),
+    // Base do catálogo como valor imediato; o Service recalcula em seguida.
+    initialData: () => getWidgetData(widget.dataKey),
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
+
+  const data = query.data;
 
   if (!data || data.kind !== widget.component) {
     return (
       <EmptyState
         title="Widget indisponível"
-        description={`Sem dados simulados para "${widget.code}".`}
+        description={`Sem dados disponíveis para "${widget.code}".`}
       />
     );
   }

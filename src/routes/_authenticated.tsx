@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { LoadingState } from "@/components/common/LoadingState";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import { LegacyLocalFilesNotice } from "@/features/leads/components/LegacyLocalFilesNotice";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -27,6 +28,7 @@ function AuthenticatedLayout() {
   return (
     <AppLayout>
       <Outlet />
+      <LegacyLocalFilesNotice />
     </AppLayout>
   );
 }

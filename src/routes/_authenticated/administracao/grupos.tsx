@@ -21,7 +21,7 @@ import {
   updateGroup,
 } from "@/features/groups/services/groupService";
 import type { Group, GroupInput } from "@/features/groups/types";
-import { MOCK_PROFILES } from "@/features/profiles/data/mockProfiles";
+import { SEED_PROFILES } from "@/features/profiles/data/seedProfiles";
 import { countUsersBy } from "@/features/users/services/userService";
 
 export const Route = createFileRoute("/_authenticated/administracao/grupos")({
@@ -110,7 +110,7 @@ function GruposPage() {
       header: "Perfis",
       hideOnMobile: true,
       cell: (group) =>
-        MOCK_PROFILES.filter((profile) => profile.groupCode === group.code).length,
+        SEED_PROFILES.filter((profile) => profile.groupCode === group.code).length,
     },
     {
       key: "modules",

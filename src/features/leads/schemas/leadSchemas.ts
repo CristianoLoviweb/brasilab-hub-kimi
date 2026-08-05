@@ -90,6 +90,25 @@ export const leadScheduleSchema = z.object({
 
 export type LeadScheduleFormValues = z.input<typeof leadScheduleSchema>;
 
+/** Edição de compromisso existente na agenda do Lead. */
+export const leadScheduleEditSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(3, "Informe o título do compromisso")
+    .max(120, "Máximo de 120 caracteres"),
+  scheduledFor: z.string().min(1, "Informe a data e o horário"),
+  description: z
+    .string()
+    .trim()
+    .min(3, "Descreva o objetivo do contato")
+    .max(300, "Máximo de 300 caracteres"),
+  ownerId: z.string().min(1, "Selecione o responsável"),
+  status: z.enum(["pendente", "concluido", "cancelado", "expirado"]),
+});
+
+export type LeadScheduleEditFormValues = z.input<typeof leadScheduleEditSchema>;
+
 /** Nota interna. */
 export const leadNoteSchema = z.object({
   content: z
@@ -101,13 +120,17 @@ export const leadNoteSchema = z.object({
 
 export type LeadNoteFormValues = z.input<typeof leadNoteSchema>;
 
-/** Metadados do arquivo (sem Storage real nesta Sprint). */
+/** Arquivo real vinculado ao Lead (armazenamento local em IndexedDB). */
+export const LEAD_FILE_MAX_SIZE_IN_BYTES = 10 * 1024 * 1024;
+
 export const leadFileSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(3, "Informe o nome do arquivo")
-    .max(160, "Máximo de 160 caracteres"),
+  file: z
+    .custom<File>(
+      (value) => typeof File !== "undefined" && value instanceof File,
+      "Selecione um arquivo",
+    )
+    .refine((file) => file.size > 0, "O arquivo está vazio")
+    .refine((file) => file.size <= LEAD_FILE_MAX_SIZE_IN_BYTES, "Máximo de 10 MB por arquivo"),
   classification: z.string().min(1, "Selecione a classificação"),
 });
 
@@ -140,11 +163,7 @@ export type LeadRejectionValues = z.input<typeof leadRejectionSchema>;
 
 /** Encerramento (perdido ou descartado). */
 export const leadClosingSchema = z.object({
-  reason: z
-    .string()
-    .trim()
-    .min(5, "Descreva o motivo")
-    .max(300, "Máximo de 300 caracteres"),
+  reason: z.string().trim().min(5, "Descreva o motivo").max(300, "Máximo de 300 caracteres"),
 });
 
 export type LeadClosingValues = z.input<typeof leadClosingSchema>;

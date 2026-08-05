@@ -219,6 +219,51 @@ Escopo:
 
 ---
 
+## Sprint 03.1 — Preparação do Projeto para Ambiente Real
+
+Status: concluída.
+
+Escopo entregue:
+
+- Remoção integral dos dados fictícios utilizados nas Sprints 01–03 (usuários, leads, dashboard, auditoria)
+- Usuário único inicial: Administrador Master (Grupo Administração, Perfil Master, todas as permissões)
+- Autenticação simulada por e-mail e senha, exclusiva do usuário master, com senha armazenada como hash
+- Remoção do seletor de desenvolvimento (DevGroupSwitcher)
+- Dashboard funcional com indicadores zerados e componentes de estado vazio
+- Módulos funcionais com listagens vazias ("Nenhum registro encontrado.")
+- Manutenção de Grupos, Perfis, Permissões, Matriz de permissões, rotas, componentes, layout, arquitetura e Design System
+
+Revisão 01 — correções de homologação:
+
+- Upload real de arquivos do Lead (IndexedDB, sem localStorage e sem Base64): anexar, visualizar, abrir, baixar e excluir, com registro no Histórico e na Auditoria
+- Dashboard dinâmico: todos os indicadores calculados pelos Services a cada montagem dos Widgets
+- Correção do cabeçalho dos cards no componente reutilizável (SectionCard), aplicada a todas as telas
+
+Revisão 02 — ajustes finais do módulo de Leads:
+
+- Edição e exclusão de compromissos da agenda do Lead, com confirmação de exclusão e registro no Histórico (dados anteriores e novos) e na Auditoria
+- Visualização de imagens (JPG, JPEG, PNG, WEBP, GIF) e PDF em modal dentro da aplicação, com download e liberação das URLs temporárias; demais formatos seguem abrindo em nova aba
+
+---
+
+## Sprint 03.2 — Infraestrutura e Migração para Servidor Online
+
+Status: concluída (homologação local com PostgreSQL).
+
+Escopo entregue:
+
+- PostgreSQL 16 como banco exclusivo da aplicação (desenvolvimento, homologação, testes de integração e produção) — sem SQLite
+- Camada de servidor completa: repositórios (Drizzle ORM), Services com a mesma lógica homologada das Sprints anteriores, Server Functions com validação e autorização no servidor
+- Autenticação real: sessão em cookie HttpOnly, senha com hash argon2id, revogação no logout e limite de tentativas de login
+- Persistência real de Leads (agregado transacional), usuários, grupos, perfis e auditoria
+- Arquivos reais: upload multipart, storage físico configurável por variável de ambiente, caminho relativo no banco (leads/<código>/arquivos/<uuid>.<ext>), streaming com suporte a Range
+- Tratamento dos dados locais legados: detecção e aviso ao usuário, sem exclusão automática; remoção individual e nomeada das chaves da autenticação simulada
+- Migrations SQL versionadas (nunca apagam nem recriam tabelas) e seed idempotente (Administrador Master, grupos, perfis e permissões)
+- Docker Compose com aplicação + PostgreSQL + volumes persistentes (banco e storage)
+- Documentação de publicação em produção (proxy reverso, HTTPS, variáveis de ambiente, backup e restauração) em docs/sprint-03.2/DEPLOY_PRODUCAO.md
+
+---
+
 ## Sprint 04 — Propostas
 
 Escopo:

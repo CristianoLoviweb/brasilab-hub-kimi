@@ -3,14 +3,19 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowLeft,
   CalendarPlus,
+  Download,
+  ExternalLink,
   FileUp,
   Handshake,
   Mail,
   MessageSquare,
+  Pencil,
   PhoneCall,
   StickyNote,
+  Trash2,
   UserPlus,
 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { DetailList } from "@/components/common/DetailList";
@@ -18,16 +23,28 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { PageHeader } from "@/components/common/PageHeader";
 import { SectionCard } from "@/components/common/SectionCard";
 import { StatusBadge } from "@/components/common/StatusBadge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LeadHistoryTimeline } from "@/features/leads/components/LeadHistoryTimeline";
+import { LeadFilePreviewDialog } from "@/features/leads/components/LeadFilePreviewDialog";
 import {
   LeadAssignmentDialog,
   LeadFileDialog,
   LeadNoteDialog,
   LeadReasonDialog,
   LeadScheduleDialog,
+  LeadScheduleEditDialog,
 } from "@/features/leads/components/dialogs/LeadActionDialogs";
 import { LeadContactDialog } from "@/features/leads/components/dialogs/LeadContactDialog";
 import {
@@ -44,10 +61,10 @@ import {
   LEAD_STATUS_TONE,
 } from "@/features/leads/constants/leadDomain";
 import { LEAD_PERMISSIONS } from "@/features/leads/constants/leadPermissions";
+import { COMMERCIAL_SELLERS } from "@/features/leads/data/commercialTeam";
 import { LEAD_APPROVAL_DEADLINE_HOURS } from "@/features/leads/constants/leadTiming";
 import { useCommercialActor } from "@/features/leads/hooks/useCommercialActor";
 import {
-  addFile,
   addNote,
   approveRequest,
   assignLeadDirectly,
@@ -58,15 +75,23 @@ import {
   markLeadAsLost,
   registerContact,
   rejectRequest,
+  removeFile,
+  removeSchedule,
   requestLead,
   scheduleContact,
+  updateSchedule,
 } from "@/features/leads/services/leadService";
 import type { DirectAssignmentInput } from "@/features/leads/services/leadService";
-import type { LeadContactSubmit } from "@/features/leads/components/dialogs/LeadContactDialog";
 import {
-  buildMailtoUrl,
-  buildWhatsAppUrl,
-} from "@/features/leads/utils/leadContactLinks";
+  formatFileSize,
+  getLeadFilePreviewKind,
+  getLeadFileUrl,
+  uploadLeadFile,
+} from "@/features/leads/services/leadFileStorage";
+import type { LeadFile, LeadSchedule } from "@/features/leads/types";
+import type { LeadContactSubmit } from "@/features/leads/components/dialogs/LeadContactDialog";
+import type { LeadScheduleEditFormValues } from "@/features/leads/schemas/leadSchemas";
+import { buildMailtoUrl, buildWhatsAppUrl } from "@/features/leads/utils/leadContactLinks";
 import { describeDeadline } from "@/features/leads/utils/leadTime";
 import { formatDateTime } from "@/lib/query";
 
@@ -119,10 +144,7 @@ function LeadDetalhePage() {
 
   /* Mutations — uma por ação disponível na página. */
   const request = run<void>(() => requestLead(leadId, actor), "Solicitação enviada.");
-  const approve = run<void>(
-    () => approveRequest(leadId, actor),
-    "Solicitação aprovada.",
-  );
+  const approve = run<void>(() => approveRequest(leadId, actor), "Solicitação aprovada.");
   const reject = run<string>(
     (reason) => rejectRequest(leadId, actor, reason),
     "Solicitação recusada.",
@@ -139,22 +161,73 @@ function LeadDetalhePage() {
     (input) => scheduleContact(leadId, actor, input),
     "Contato agendado.",
   );
+  const scheduleEdit = run<{
+    scheduleId: string;
+    values: LeadScheduleEditFormValues;
+  }>(
+    ({ scheduleId, values }) =>
+      updateSchedule(leadId, actor, scheduleId, {
+        title: values.title,
+        description: values.description,
+        scheduledFor: values.scheduledFor,
+        ownerId: values.ownerId,
+        ownerName:
+          COMMERCIAL_SELLERS.find((seller) => seller.id === values.ownerId)?.name ?? actor.name,
+        status: values.status,
+      }),
+    "Compromisso atualizado.",
+  );
+  const scheduleRemoval = run<string>(
+    (scheduleId) => removeSchedule(leadId, actor, scheduleId),
+    "Compromisso excluído.",
+  );
+  const [scheduleToRemove, setScheduleToRemove] = useState<LeadSchedule | null>(null);
   const note = run<string>(
     (content) => addNote(leadId, actor, content),
     "Nota interna adicionada.",
   );
-  const file = run<{ name: string; classification: string }>(
-    (input) => addFile(leadId, actor, input),
-    "Arquivo registrado.",
+  /*
+   * Upload multipart direto para o servidor (POST /api/leads/arquivos).
+   * O binário é gravado no storage persistente; o banco guarda apenas
+   * o caminho relativo e os metadados (condicional nº 5).
+   */
+  const file = run<{ file: File; classification: string }>(
+    (input) => uploadLeadFile(leadId, { file: input.file, classification: input.classification }),
+    "Arquivo anexado.",
   );
+  const fileRemoval = run<string>(
+    (fileId) => removeFile(leadId, actor, fileId),
+    "Arquivo excluído.",
+  );
+  const [fileToRemove, setFileToRemove] = useState<LeadFile | null>(null);
+  const [fileToPreview, setFileToPreview] = useState<LeadFile | null>(null);
+
+  /*
+   * Visualização: imagens e PDF abrem em modal dentro da aplicação;
+   * demais formatos abrem em nova aba. Em todos os casos o binário é
+   * servido pelo servidor (GET /api/leads/arquivos/:id), com streaming.
+   */
+  const openFile = (item: LeadFile) => {
+    if (getLeadFilePreviewKind(item.extension)) {
+      setFileToPreview(item);
+      return;
+    }
+    window.open(getLeadFileUrl(item.id), "_blank", "noopener,noreferrer");
+  };
+
+  /* Baixa o arquivo diretamente do servidor (Content-Disposition: attachment). */
+  const downloadFile = (item: LeadFile) => {
+    const anchor = document.createElement("a");
+    anchor.href = getLeadFileUrl(item.id, { download: true });
+    anchor.download = item.name;
+    anchor.rel = "noopener";
+    anchor.click();
+  };
   const lost = run<string>(
     (reason) => markLeadAsLost(leadId, actor, reason),
     "Lead marcado como perdido.",
   );
-  const discard = run<string>(
-    (reason) => discardLead(leadId, actor, reason),
-    "Lead descartado.",
-  );
+  const discard = run<string>((reason) => discardLead(leadId, actor, reason), "Lead descartado.");
   const convert = useMutation({
     mutationFn: () => convertLeadToProposal(leadId, actor),
     onSuccess: (result) => {
@@ -192,10 +265,7 @@ function LeadDetalhePage() {
     lead.requester.whatsapp || lead.requester.phone,
     `Olá ${lead.requester.name}, aqui é da Brasilab.`,
   );
-  const mailtoUrl = buildMailtoUrl(
-    lead.requester.email,
-    `Brasilab — ${lead.interest.product}`,
-  );
+  const mailtoUrl = buildMailtoUrl(lead.requester.email, `Brasilab — ${lead.interest.product}`);
 
   return (
     <div className="space-y-6">
@@ -257,10 +327,7 @@ function LeadDetalhePage() {
       />
 
       <div className="flex flex-wrap items-center gap-2">
-        <StatusBadge
-          label={LEAD_STATUS_LABELS[lead.status]}
-          tone={LEAD_STATUS_TONE[lead.status]}
-        />
+        <StatusBadge label={LEAD_STATUS_LABELS[lead.status]} tone={LEAD_STATUS_TONE[lead.status]} />
         <StatusBadge
           label={LEAD_SITUATION_LABELS[lead.situation]}
           tone={LEAD_SITUATION_TONE[lead.situation]}
@@ -337,9 +404,7 @@ function LeadDetalhePage() {
                 {
                   label: "Localidade",
                   value:
-                    [lead.requester.city, lead.requester.state]
-                      .filter(Boolean)
-                      .join(" / ") || "—",
+                    [lead.requester.city, lead.requester.state].filter(Boolean).join(" / ") || "—",
                 },
               ]}
             />
@@ -449,8 +514,7 @@ function LeadDetalhePage() {
               <ul className="divide-y">
                 {[...lead.contacts]
                   .sort(
-                    (a, b) =>
-                      new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime(),
+                    (a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime(),
                   )
                   .map((item) => (
                     <li key={item.id} className="space-y-1 py-3 first:pt-0 last:pb-0">
@@ -507,8 +571,7 @@ function LeadDetalhePage() {
                 {[...lead.schedules]
                   .sort(
                     (a, b) =>
-                      new Date(a.scheduledFor).getTime() -
-                      new Date(b.scheduledFor).getTime(),
+                      new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime(),
                   )
                   .map((item) => (
                     <li
@@ -528,9 +591,42 @@ function LeadDetalhePage() {
                         <p className="mt-1 text-sm">{item.description}</p>
                         <p className="text-xs text-muted-foreground">{item.ownerName}</p>
                       </div>
-                      <p className="text-sm font-medium">
-                        {formatDateTime(item.scheduledFor)}
-                      </p>
+                      <div className="flex shrink-0 items-center gap-1">
+                        <p className="text-sm font-medium">{formatDateTime(item.scheduledFor)}</p>
+                        {canOperate && can(LEAD_PERMISSIONS.agendarContato) ? (
+                          <>
+                            <LeadScheduleEditDialog
+                              schedule={item}
+                              submitting={scheduleEdit.isPending}
+                              onSubmit={async (values) => {
+                                await scheduleEdit.mutateAsync({
+                                  scheduleId: item.id,
+                                  values,
+                                });
+                              }}
+                              trigger={
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  title="Editar compromisso"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                              }
+                            />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="Excluir compromisso"
+                              onClick={() => setScheduleToRemove(item)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        ) : null}
+                      </div>
                     </li>
                   ))}
               </ul>
@@ -582,7 +678,7 @@ function LeadDetalhePage() {
         <TabsContent value="arquivos">
           <SectionCard
             title="Arquivos"
-            description="Metadados simulados. Nenhum arquivo é armazenado nesta Sprint."
+            description="Arquivos vinculados ao atendimento, armazenados localmente com segurança."
             actions={
               can(LEAD_PERMISSIONS.adicionarArquivo) ? (
                 <LeadFileDialog
@@ -615,11 +711,42 @@ function LeadDetalhePage() {
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">{item.name}</p>
                       <p className="text-xs text-muted-foreground">
-                        {item.classification} · {formatDateTime(item.uploadedAt)} ·{" "}
-                        {item.authorName}
+                        {item.classification} · {formatFileSize(item.sizeInBytes)} ·{" "}
+                        {formatDateTime(item.uploadedAt)} · {item.authorName}
                       </p>
                     </div>
-                    <StatusBadge label={item.extension.toUpperCase() || "ARQUIVO"} />
+                    <div className="flex shrink-0 items-center gap-1">
+                      <StatusBadge label={item.extension.toUpperCase() || "ARQUIVO"} />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        title="Abrir arquivo"
+                        onClick={() => openFile(item)}
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        title="Baixar arquivo"
+                        onClick={() => downloadFile(item)}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      {can(LEAD_PERMISSIONS.adicionarArquivo) ? (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          title="Excluir arquivo"
+                          onClick={() => setFileToRemove(item)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      ) : null}
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -636,6 +763,74 @@ function LeadDetalhePage() {
           </SectionCard>
         </TabsContent>
       </Tabs>
+
+      <AlertDialog
+        open={fileToRemove !== null}
+        onOpenChange={(open) => {
+          if (!open) setFileToRemove(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir arquivo</AlertDialogTitle>
+            <AlertDialogDescription>
+              {fileToRemove
+                ? `O arquivo "${fileToRemove.name}" será excluído definitivamente. A ação será registrada no Histórico e na Auditoria.`
+                : null}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={fileRemoval.isPending}
+              onClick={() => {
+                if (!fileToRemove) return;
+                fileRemoval.mutate(fileToRemove.id);
+                setFileToRemove(null);
+              }}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={scheduleToRemove !== null}
+        onOpenChange={(open) => {
+          if (!open) setScheduleToRemove(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir compromisso</AlertDialogTitle>
+            <AlertDialogDescription>
+              {scheduleToRemove
+                ? `O compromisso "${scheduleToRemove.title}" será excluído da agenda. A exclusão será registrada no Histórico e na Auditoria.`
+                : null}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={scheduleRemoval.isPending}
+              onClick={() => {
+                if (!scheduleToRemove) return;
+                scheduleRemoval.mutate(scheduleToRemove.id);
+                setScheduleToRemove(null);
+              }}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <LeadFilePreviewDialog
+        file={fileToPreview}
+        onClose={() => setFileToPreview(null)}
+        onDownload={downloadFile}
+      />
     </div>
   );
 }

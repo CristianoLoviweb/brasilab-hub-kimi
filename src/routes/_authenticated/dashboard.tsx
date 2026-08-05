@@ -2,8 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LayoutDashboard } from "lucide-react";
 
 import { PageHeader } from "@/components/common/PageHeader";
-import { Badge } from "@/components/ui/badge";
-import { DevGroupSwitcher } from "@/features/access/components/DevGroupSwitcher";
 import { useAccessGroup } from "@/features/access/hooks/useAccessGroup";
 import { DashboardGrid } from "@/features/dashboard/components/DashboardGrid";
 import { getDashboardConfig } from "@/features/dashboard/config/dashboardConfig";
@@ -39,7 +37,7 @@ function greeting() {
 
 function DashboardPage() {
   const { user } = useAuth();
-  const { group, code, profileId, changeGroup, changeProfile } = useAccessGroup();
+  const { group, code, profileId } = useAccessGroup();
   const firstName = user?.name?.split(" ")[0] ?? "usuário";
   const config = getDashboardConfig(code);
   const profileConfig = getDashboardProfileConfig(profileId);
@@ -50,24 +48,6 @@ function DashboardPage() {
         title={`${greeting()}, ${firstName}`}
         description={`${profileConfig?.title ?? config.title} · ${config.description}`}
         icon={LayoutDashboard}
-        actions={
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">Dados simulados</Badge>
-            {/*
-              DEVELOPMENT ONLY
-              Seletor de Grupo/Perfil usado apenas para testar os Dashboards.
-              Será removido quando a Autenticação definitiva estiver pronta —
-              Grupo e Perfil virão automaticamente do usuário autenticado.
-              O usuário final nunca visualizará este seletor.
-            */}
-            <DevGroupSwitcher
-              value={code}
-              onChange={changeGroup}
-              profileId={profileId}
-              onProfileChange={changeProfile}
-            />
-          </div>
-        }
       />
 
       <DashboardGrid group={group} profileId={profileId} />

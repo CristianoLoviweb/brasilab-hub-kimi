@@ -1,13 +1,7 @@
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface SectionCardProps {
@@ -32,7 +26,7 @@ export function SectionCard({
 }: SectionCardProps) {
   return (
     <Card className={cn("shadow-card", className)}>
-      <CardHeader className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 sm:flex sm:items-center sm:justify-between">
+      <CardHeader className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 sm:flex sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div className="flex min-w-0 items-center gap-2">
           {Icon ? <Icon className="h-4 w-4 shrink-0 text-primary" /> : null}
           <div className="min-w-0">

@@ -136,9 +136,25 @@ cd brasilab-hub
 npm install
 ```
 
-## Executar ambiente de desenvolvimento
+## Subir o ambiente completo (recomendado — Docker)
+
+Requisito: Docker Engine + Docker Compose (no Windows, Docker Desktop).
 
 ```bash
+cp .env.example .env
+docker compose up -d --build
+```
+
+A aplicação sobe em `http://localhost:3000` com PostgreSQL 16, migrations
+aplicadas automaticamente e o seed inicial (Administrador Master) executado
+de forma idempotente. Para parar: `docker compose down`.
+
+## Executar ambiente de desenvolvimento (sem Docker)
+
+Requisito: PostgreSQL 16 acessível e `DATABASE_URL` configurada no `.env`.
+
+```bash
+npm run db:setup   # aplica migrations + seed inicial (idempotente)
 npm run dev
 ```
 
@@ -147,6 +163,9 @@ npm run dev
 ```bash
 npm run build
 ```
+
+A publicação em produção (proxy reverso, HTTPS, volumes, backup e
+restauração) está documentada em `docs/sprint-03.2/DEPLOY_PRODUCAO.md`.
 
 ---
 
@@ -211,7 +230,12 @@ Novos módulos poderão ser incorporados futuramente conforme a evolução da em
 
 Atualmente o projeto possui implementados:
 
-- Sistema de autenticação (simulado)
+- Sistema de autenticação (simulado — acesso exclusivo do usuário Administrador Master)
+- Ambiente preparado para uso real (Sprint 03.1): nenhum dado fictício; indicadores e listagens iniciam vazios
+- Indicadores do Dashboard calculados dinamicamente pelos Services a cada ação do usuário
+- Upload real de arquivos do Lead em armazenamento local estruturado (IndexedDB), com abrir, baixar e excluir
+- Edição e exclusão de compromissos da agenda do Lead, com confirmação e registro no Histórico e na Auditoria
+- Visualização de imagens e PDFs do Lead em modal dentro da aplicação, com download e liberação de URLs temporárias
 - Layout principal da aplicação
 - Dashboard
 - Administração

@@ -62,7 +62,7 @@ function LoginPage() {
       toast.success("Bem-vindo à Brasilab Intranet Lab");
       navigate({ to: "/dashboard", replace: true });
     } catch {
-      toast.error("Não foi possível entrar. Tente novamente.");
+      toast.error("E-mail ou senha inválidos.");
     } finally {
       setSubmitting(false);
     }
@@ -164,8 +164,7 @@ function LoginPage() {
           </Card>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            Sprint 01 · autenticação temporária para navegação. A integração definitiva
-            será entregue com o módulo de Autenticação.
+            Acesso restrito · somente usuários autorizados podem entrar na plataforma.
           </p>
         </div>
       </div>
