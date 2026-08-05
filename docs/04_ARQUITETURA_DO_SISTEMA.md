@@ -132,6 +132,16 @@ Responsabilidades:
 
 A camada de dados nunca deverá conhecer detalhes da interface.
 
+## 9.1 Implementação homologada (Sprint 03.2 — Baseline v0.3.0)
+
+- Persistência em PostgreSQL 16, acessado exclusivamente pela camada de servidor — a interface nunca acessa o banco diretamente.
+- Repositórios com Drizzle ORM; migrations SQL versionadas que nunca apagam nem recriam tabelas; seed inicial idempotente.
+- Os Services executam no servidor através de Server Functions (TanStack Start sobre Nitro), preservando as mesmas assinaturas homologadas nas Sprints anteriores — a troca da fonte de dados foi transparente para a interface.
+- Toda operação é validada (Zod) e autorizada (catálogo de permissões) também no servidor.
+- Arquivos físicos em volume persistente no servidor (`STORAGE_DIR`); o banco registra somente o caminho relativo e os metadados; leitura por streaming com suporte a Range.
+- Sessão autenticada em cookie HttpOnly, com expiração e revogação controladas no servidor.
+- Detalhes de infraestrutura e publicação: `docs/sprint-03.2/DEPLOY_PRODUCAO.md`.
+
 ---
 
 # 10. CAMADA DE SERVIÇOS

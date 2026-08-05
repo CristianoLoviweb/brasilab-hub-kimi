@@ -2,9 +2,10 @@
 
 # Brasilab Intranet Lab
 
-Versão: 1.0
-Status: Em Planejamento
+Versão: 1.1
+Status: Em Execução
 Data: Julho de 2026
+Última atualização: Agosto de 2026 — Sprint 03.2 homologada (Baseline v0.3.0)
 
 ---
 
@@ -62,6 +63,8 @@ Ao final desta fase o usuário deverá conseguir utilizar uma Intranet completam
 ---
 
 ## Sprint 01 — Estrutura da Plataforma
+
+Status: homologada.
 
 ### Objetivo
 
@@ -221,7 +224,7 @@ Escopo:
 
 ## Sprint 03.1 — Preparação do Projeto para Ambiente Real
 
-Status: concluída.
+Status: homologada (inclui as Revisões 01 e 02).
 
 Escopo entregue:
 
@@ -265,6 +268,8 @@ Escopo entregue:
 ---
 
 ## Sprint 04 — Propostas
+
+Status: não iniciada. Pré-requisito liberado com a homologação da Sprint 03.2.
 
 Escopo:
 

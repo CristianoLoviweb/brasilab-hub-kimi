@@ -280,6 +280,8 @@ O banco de dados armazenará apenas os metadados.
 
 Nunca deverão ser armazenados arquivos binários diretamente no banco de dados.
 
+Implementação homologada (Sprint 03.2 — Baseline v0.3.0): os arquivos físicos ficam em volume persistente no servidor, em diretório configurável por variável de ambiente (`STORAGE_DIR`), organizados por entidade (ex.: `leads/<código>/arquivos/<uuid>.<ext>`). O banco registra somente o caminho relativo e os metadados, e o acesso ocorre exclusivamente através do servidor (upload multipart e streaming com suporte a Range) — nunca por URL pública e nunca em Base64.
+
 ---
 
 # 15. SEGURANÇA

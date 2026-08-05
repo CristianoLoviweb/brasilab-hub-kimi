@@ -135,7 +135,7 @@ Objetivos:
 
 Tecnologia oficial:
 
-- React Router
+- TanStack Router (integrado ao TanStack Start)
 
 Responsabilidades:
 
@@ -151,11 +151,15 @@ Responsabilidades:
 
 Banco oficial:
 
-- PostgreSQL
+- PostgreSQL 16
 
-Gerenciado através do:
+Acesso e migrations:
 
-- Supabase
+- Drizzle ORM + drizzle-kit (migrations SQL versionadas, aplicadas no deploy)
+
+Execução:
+
+- Container Docker em todos os ambientes (desenvolvimento, homologação, testes de integração e produção), orquestrado por Docker Compose — sem SQLite e sem banco alternativo.
 
 Todo dado operacional da empresa deverá permanecer armazenado no banco de dados.
 
@@ -165,53 +169,58 @@ O banco será considerado a fonte oficial de todas as informações da plataform
 
 # 10. BACKEND
 
-Serviço oficial:
+Stack oficial:
 
-- Supabase
+- TanStack Start (Server Functions — `createServerFn`) executando sobre Nitro SSR, no mesmo codebase do frontend
 
-Recursos previstos:
+Camadas do servidor:
 
-- PostgreSQL
-- Authentication
-- Storage
-- Edge Functions
-- APIs
-- Realtime
+- Repositórios (Drizzle ORM)
+- Services com as regras de negócio
+- Server Functions com validação (Zod) e autorização (catálogo de permissões) no servidor
 
-Sempre que possível deverão ser utilizados recursos nativos da plataforma.
+Recursos:
+
+- Persistência transacional no PostgreSQL
+- Sessão e autenticação no servidor
+- Upload multipart e streaming de arquivos (suporte a Range)
+
+Não há API REST/GraphQL separada: as chamadas de dados sobem para o servidor dentro do mesmo projeto.
 
 ---
 
 # 11. AUTENTICAÇÃO
 
-Serviço oficial:
+Mecanismo oficial (homologado na Sprint 03.2):
 
-- Supabase Auth
+- Sessão própria no servidor, com cookie `HttpOnly; SameSite=Lax` (`Secure` em produção)
+- Senha com hash argon2id (`@node-rs/argon2`)
+- Tabela de sessões com expiração e revogação no logout
+- Limite de tentativas de login
 
-Recursos previstos:
+Recursos:
 
 - login;
 - logout;
-- recuperação de senha;
-- sessões;
-- refresh tokens;
-- autenticação segura.
-
-Toda autenticação deverá utilizar mecanismos oficiais da plataforma.
+- recuperação de senha (estrutura prevista);
+- sessões com validade controlada.
 
 ---
 
 # 12. STORAGE
 
-Serviço oficial:
+Solução oficial (homologada na Sprint 03.2):
 
-- Supabase Storage
+- Volume persistente no servidor, em diretório configurável por variável de ambiente (`STORAGE_DIR`)
+- Caminho preparado para object storage S3-compatível via variável de ambiente, sem mudança de código
 
 O Storage será utilizado exclusivamente para armazenar arquivos físicos.
 
 O Storage NÃO deverá ser utilizado como fonte de informações da aplicação.
 
 Toda informação sobre arquivos deverá permanecer armazenada no banco de dados.
+
+O banco registra somente o caminho relativo (ex.: `leads/<código>/arquivos/<uuid>.<ext>`) e os metadados — nunca caminho absoluto nem binário.
 
 ---
 
@@ -522,6 +531,10 @@ Toda alteração deverá ser:
 - aprovada.
 
 Este documento deverá ser atualizado sempre que uma tecnologia oficial for adicionada, removida ou substituída.
+
+Registro de alterações:
+
+- **Agosto de 2026 — Sprint 03.2 (homologada, Baseline v0.3.0):** o backend deixou de ser previsto sobre Supabase e passou a ser stack própria, conforme plano aprovado da Sprint: PostgreSQL 16 exclusivo em todos os ambientes (sem SQLite), Drizzle ORM com migrations SQL versionadas, Server Functions do TanStack Start sobre Nitro, autenticação própria com sessão em cookie HttpOnly + argon2id e storage em volume persistente no servidor (`STORAGE_DIR`). Registrado também que o roteamento oficial é TanStack Router (já em uso desde a fundação do projeto), substituindo a referência anterior a React Router.
 
 ---
 

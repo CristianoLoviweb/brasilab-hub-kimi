@@ -38,6 +38,15 @@ O projeto foi desenvolvido utilizando tecnologias modernas, priorizando organiza
 - Vite
 - Tailwind CSS
 
+## Backend e Infraestrutura (Sprint 03.2 — homologada)
+
+- TanStack Start (Server Functions) + Nitro SSR — camada de servidor no mesmo codebase
+- PostgreSQL 16 — banco exclusivo em todos os ambientes (via Docker)
+- Drizzle ORM — schema em TypeScript e migrations SQL versionadas
+- Autenticação real — sessão em cookie HttpOnly, senha com hash argon2id
+- Storage de arquivos — volume persistente no servidor (`STORAGE_DIR`), com streaming
+- Docker Compose — aplicação + PostgreSQL + volumes persistentes (banco e arquivos)
+
 ## Estrutura
 
 A aplicação segue arquitetura modular, onde cada módulo possui sua própria organização interna contendo:
@@ -228,14 +237,20 @@ Novos módulos poderão ser incorporados futuramente conforme a evolução da em
 
 # Status Atual
 
+**Baseline v0.3.0 — Sprint 03.2 homologada em 06 de agosto de 2026.**
+(Registro: `docs/sprint-03.2/HOMOLOGACAO.md` e `docs/CHANGELOG.md`.)
+
 Atualmente o projeto possui implementados:
 
-- Sistema de autenticação (simulado — acesso exclusivo do usuário Administrador Master)
+- Autenticação real (Sprint 03.2): sessão em cookie HttpOnly, senha com hash argon2id, revogação no logout e limite de tentativas de login
+- Persistência real em PostgreSQL 16 (Sprint 03.2): Leads, agenda, arquivos, usuários, grupos, perfis e auditoria, via Drizzle ORM, com migrations versionadas e seed idempotente
+- Validação e autorização conferidas também no servidor (Server Functions)
+- Upload real de arquivos do Lead em storage persistente no servidor (upload multipart, caminho relativo no banco, streaming com suporte a Range), com visualizar, abrir, baixar e excluir
+- Ambiente Docker Compose: aplicação + PostgreSQL + volumes persistentes, com migrations e seed aplicados automaticamente na subida
 - Ambiente preparado para uso real (Sprint 03.1): nenhum dado fictício; indicadores e listagens iniciam vazios
 - Indicadores do Dashboard calculados dinamicamente pelos Services a cada ação do usuário
-- Upload real de arquivos do Lead em armazenamento local estruturado (IndexedDB), com abrir, baixar e excluir
 - Edição e exclusão de compromissos da agenda do Lead, com confirmação e registro no Histórico e na Auditoria
-- Visualização de imagens e PDFs do Lead em modal dentro da aplicação, com download e liberação de URLs temporárias
+- Visualização de imagens e PDFs do Lead em modal dentro da aplicação, com download
 - Layout principal da aplicação
 - Dashboard
 - Administração
@@ -264,7 +279,7 @@ Entre eles:
 - Isolamento entre módulos;
 - Auditoria de ações;
 - Proteção de informações sensíveis;
-- Evolução preparada para autenticação real e backend seguro.
+- Autenticação real e validação de permissões no servidor (homologadas na Sprint 03.2).
 
 ---
 

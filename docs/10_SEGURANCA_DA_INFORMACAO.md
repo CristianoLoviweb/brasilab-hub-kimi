@@ -270,7 +270,7 @@ A plataforma deverá possuir política de backup.
 
 Os backups deverão permitir recuperação em caso de falha.
 
-A estratégia de backup será definida posteriormente.
+A estratégia de backup foi definida na Sprint 03.2: rotina agendada (diária) de dump do PostgreSQL (`pg_dump`) e cópia do volume de arquivos, com procedimento de restauração documentado em `docs/sprint-03.2/DEPLOY_PRODUCAO.md`. Banco e storage formam um par e deverão ser sempre restaurados do mesmo ponto no tempo.
 
 ---
 
